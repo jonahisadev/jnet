@@ -2,7 +2,7 @@
 
 namespace JNet {
 #ifdef OS_UNIX
-    UDPServer::UDPServer(int port, std::function<void(struct sockaddr_in& client, std::string msg)> on_receive)
+    UDPServer::UDPServer(int port, std::function<void(NetworkDevice& client, std::string msg)> on_receive)
             : _port(port), _on_receive(on_receive) {
         if ((_sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
             throw "Socket creation failed";
@@ -43,10 +43,9 @@ namespace JNet {
         _running = false;
     }
 
-    void UDPServer::send(struct sockaddr_in& client, std::string msg) {
+    void UDPServer::send(struct sockaddr_in& client, const std::string& msg) {
         socklen_t len = sizeof(client);
-        sendto(_sock, msg.c_str(), msg.length(), MSG_CONFIRM | MSG_DONTWAIT, (const struct sockaddr*)&client, len);
+        sendto(_sock, msg.c_str(), msg.length(), MSG_CONFIRM, (const struct sockaddr*)&client, len);
     }
-
 #endif
 }

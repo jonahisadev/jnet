@@ -14,6 +14,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <netdb.h>
 #endif
 
 #define MAX_BUFFER 65355
@@ -22,27 +23,26 @@
 typedef struct sockaddr_in NetworkDevice;
 #endif
 
+#define CLIENT_WAIT(client) while (client.isRunning())
+
 namespace JNet {
-    class UDPServer {
+    class UDPClient {
 #ifdef OS_UNIX
     private:
         int _sock;
-        const int _port;
-        char _buffer[MAX_BUFFER];
+        bool _running;
         NetworkDevice _server;
-        bool _running = false;
-        std::function<void(NetworkDevice& client, std::string msg)> _on_receive;
-
+        std::function<void(const std::string& msg)> _on_receive;
+        
     public:
-        UDPServer(int port, std::function<void(NetworkDevice& client, std::string msg)> on_receive);
-        ~UDPServer();
+        UDPClient(const std::string& ip, int port, std::function<void(const std::string& msg)> on_receive);
+        ~UDPClient();
         
         void start();
         void stop();
-        void send(NetworkDevice& client, const std::string& msg);
+        void send(const std::string& msg);
         
-        inline int getPort() const { return _port; }
-        inline bool isRunning() const { return _running; }
+        bool isRunning() const { return _running; }
 #endif
     };
 }
